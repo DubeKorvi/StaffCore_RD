@@ -1,0 +1,24 @@
+﻿@model StaffCoreRD.Models.Staff
+@{
+    ViewData["Title"] = "Eliminar Empleado";
+}
+
+<h2>¿Eliminar este empleado?</h2>
+
+<div class="card" style="max-width: 400px;">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Nombre</h5>
+        <p class="card-text">
+            <strong>Cédula:</strong> @Model.Cedula<br />
+            <strong>Cargo:</strong> @Model.Cargo<br />
+            <strong>Departamento:</strong> @Model.Departamento<br />
+            <strong>Salario:</strong> @Model.Salario.ToString("C")
+        </p>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
