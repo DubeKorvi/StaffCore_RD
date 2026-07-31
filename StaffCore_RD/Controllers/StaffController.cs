@@ -48,5 +48,35 @@ namespace StaffCoreRD.Controllers
             TempData["Exito"] = "Empleado creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
+
+
+        // GET: Staff/Edit/5
+        [Authorize(Roles = "Administrador,RRHH")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var staff = await _context.Personal.FindAsync(id);
+            if (staff == null) return NotFound();
+
+            return View(staff);
+        }
+
+        // POST: Staff/Edit/5
+        [HttpPost]
+        [Authorize(Roles = "Administrador,RRHH")]
+        public async Task<IActionResult> Edit(int id, Staff staff)
+        {
+            if (id != staff.Id) return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(staff);
+
+            _context.Update(staff);
+            await _context.SaveChangesAsync();
+
+            TempData["Exito"] = "Empleado actualizado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
