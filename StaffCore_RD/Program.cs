@@ -53,15 +53,33 @@ app.MapControllerRoute(
     pattern: "{controller=Staff}/{action=Index}/{id?}");
 
 // Crear roles automáticamente al iniciar
+// Crear roles y usuario Administrador automáticamente al iniciar
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { "Administrador", "RRHH", "Viewer" };
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
+    string[] roles = { "Administrador", "RRHH", "Viewer" };
     foreach (var rol in roles)
     {
         if (!await roleManager.RoleExistsAsync(rol))
             await roleManager.CreateAsync(new IdentityRole(rol));
+    }
+
+    // Usuario Administrador fijo (hardcodeado)
+    string adminEmail = "admin@staffcore.com";
+    string adminPassword = "Admin123!";
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        await userManager.CreateAsync(adminUser, adminPassword);
+    }
+
+    if (!await userManager.IsInRoleAsync(adminUser, "Administrador"))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Administrador");
     }
 }
 

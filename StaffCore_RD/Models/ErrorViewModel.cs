@@ -1,4 +1,4 @@
-namespace StaffCore_RD.Models
+namespace StaffCoreRD.Models
 {
     public class ErrorViewModel
     {

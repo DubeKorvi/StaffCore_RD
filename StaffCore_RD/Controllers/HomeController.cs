@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using StaffCore_RD.Models;
 using System.Diagnostics;
+using StaffCoreRD.Models;
 
-namespace StaffCore_RD.Controllers
+namespace StaffCoreRD.Controllers
 {
     public class HomeController : Controller
     {
