@@ -27,6 +27,38 @@ namespace StaffCoreRD.Controllers
             return View(lista);
         }
 
+        // GET: Staff/Buscar (para el buscador en tiempo real)
+        [HttpGet]
+        public async Task<IActionResult> Buscar(string term)
+        {
+            var lista = await _context.Personal
+                .Where(s => s.Activo && (string.IsNullOrEmpty(term) || s.Nombre.Contains(term)))
+                .OrderBy(s => s.Nombre)
+                .ToListAsync();
+
+            return Json(lista.Select(s => new
+            {
+                s.Id,
+                s.Nombre,
+                s.Cargo,
+                s.Departamento,
+                Salario = s.Salario.ToString("C")
+            }));
+        }
+
+
+        // GET: Staff/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var staff = await _context.Personal.FindAsync(id);
+            if (staff == null) return NotFound();
+
+            return View(staff);
+        }
+
+
         // GET: Staff/Create
         [Authorize(Roles = "Administrador,RRHH")]
         public IActionResult Create()

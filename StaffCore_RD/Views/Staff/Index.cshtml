@@ -10,6 +10,11 @@
     <a asp-action="Create" class="btn btn-success mb-3">+ Nuevo</a>
 }
 
+<div class="form-group mb-3">
+    <label for="buscador">Buscar por nombre</label>
+    <input type="text" id="buscador" class="form-control" placeholder="Escribe un nombre..." />
+</div>
+
 @if (!Model.Any())
 {
     <p class="text-muted">No hay empleados registrados.</p>
@@ -26,7 +31,7 @@ else
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tablaPersonal">
             @foreach (var s in Model)
             {
                 <tr>
@@ -35,6 +40,7 @@ else
                     <td>@s.Departamento</td>
                     <td>@s.Salario.ToString("C")</td>
                     <td>
+                        <a asp-action="Details" asp-route-id="@s.Id" class="btn btn-sm btn-info">Ver</a>
                         @if (User.IsInRole("Administrador") || User.IsInRole("RRHH"))
                         {
                             <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-warning">Editar</a>
@@ -55,4 +61,60 @@ else
             </tr>
         </tfoot>
     </table>
+
+    <h4 class="mt-4">Resumen por Departamento</h4>
+    <table class="table table-bordered" style="max-width: 600px;">
+        <thead>
+            <tr><th>Departamento</th><th>Empleados</th><th>Total Nómina</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var grupo in Model.GroupBy(s => s.Departamento))
+            {
+                <tr>
+                    <td>@grupo.Key</td>
+                    <td>@grupo.Count()</td>
+                    <td>@grupo.Sum(s => s.Salario).ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script>
+        const esAdmin = @(User.IsInRole("Administrador") ? "true" : "false");
+        const esRRHH = @(User.IsInRole("RRHH") ? "true" : "false");
+
+        document.getElementById('buscador').addEventListener('input', async function () {
+            const term = this.value;
+            const res = await fetch(`/Staff/Buscar?term=${encodeURIComponent(term)}`);
+            const datos = await res.json();
+            const tbody = document.getElementById('tablaPersonal');
+            tbody.innerHTML = '';
+
+            if (datos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No se encontraron empleados.</td></tr>';
+                return;
+            }
+
+            datos.forEach(s => {
+                let acciones = `<a href="/Staff/Details/${s.id}" class="btn btn-sm btn-info">Ver</a> `;
+                if (esAdmin || esRRHH) {
+                    acciones += `<a href="/Staff/Edit/${s.id}" class="btn btn-sm btn-warning">Editar</a> `;
+                }
+                if (esAdmin) {
+                    acciones += `<a href="/Staff/Delete/${s.id}" class="btn btn-sm btn-danger">Eliminar</a>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.nombre}</td>
+                        <td>${s.cargo}</td>
+                        <td>${s.departamento}</td>
+                        <td>${s.salario}</td>
+                        <td>${acciones}</td>
+                    </tr>`;
+            });
+        });
+    </script>
 }
